@@ -14,3 +14,8 @@ export const LOGGING_CONFIG = {
   LOGGER: Boolean(process.env.LOGGER) || false,
   LOG_LEVEL: process.env.LOG_LEVEL || 'info'
 };
+
+export const API_KEY_CONFIG = {
+  GROQ_API_KEY: process.env.GROQ_API_KEY || '',
+  GROQ_MODEL: process.env.GROQ_MODEL || ''
+};
