@@ -1,8 +1,8 @@
 import { FastifyInstance, RouteOptions } from 'fastify';
 import { Routes } from '@/interfaces/routes.interface';
-const HealthCheckController = require('@/controllers/healthCheck.controller');
+import HealthCheckController from '@/controllers/healthCheck.controller';
 
-module.exports = class HealthCheckRoute implements Routes {
+export default class HealthCheckRoute implements Routes {
   public path = '/';
   public indexController = new HealthCheckController();
 
@@ -27,4 +27,4 @@ module.exports = class HealthCheckRoute implements Routes {
     });
     done();
   }
-};
+}

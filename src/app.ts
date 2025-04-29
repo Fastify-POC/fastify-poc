@@ -1,16 +1,15 @@
-import { FastifyError, FastifyInstance } from 'fastify';
-const { SERVER_CONFIG, LOGGING_CONFIG } = require('./config');
-const Fastify = require('fastify');
-const fastifyCors = require('@fastify/cors');
-const fastifyEnv = require('@fastify/env');
-const envSchema = require('@/schema/env.schema');
-const initializeRoutes = require('@/plugins/initializeRoutes');
+import fastify, { FastifyError, FastifyInstance } from 'fastify';
+import { SERVER_CONFIG, LOGGING_CONFIG } from '@/config/index';
+import fastifyCors from '@fastify/cors';
+import fastifyEnv from '@fastify/env';
+import { envSchema } from '@/schema/env.schema';
+import { initializeRoutes } from '@/plugins/initializeRoutes';
 
-module.exports = class App {
+export default class App {
   public app: FastifyInstance;
 
   constructor() {
-    this.app = Fastify({
+    this.app = fastify({
       logger: LOGGING_CONFIG.LOGGER
     });
 
@@ -61,4 +60,4 @@ module.exports = class App {
       return reply.status(status).send({ error: true, message });
     });
   }
-};
+}

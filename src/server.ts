@@ -1,6 +1,4 @@
-require('module-alias/register');
-const App = require('@/app');
+import App from '@/app';
 
 const app = new App();
-
 app.listen();
