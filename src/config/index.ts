@@ -6,7 +6,7 @@ export const SERVER_CONFIG = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '3000', 10),
   API_VERSION: process.env.API_VERSION || 'v1',
-  ORIGIN: process.env.ORIGIN?.split(',') || '*',
+  ORIGIN: process.env.ORIGIN ? process.env.ORIGIN.split(',') : ['*'],
   CREDENTIALS: process.env.CREDENTIALS || 'true'
 };
 
