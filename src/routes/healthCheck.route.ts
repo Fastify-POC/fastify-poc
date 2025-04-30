@@ -4,7 +4,7 @@ import HealthCheckController from '@/controllers/healthCheck.controller';
 import { healthCheckSchema } from '@/schema/healthCheck.schema';
 
 export default class HealthCheckRoute implements Routes {
-  public path = '/';
+  public path = '';
   public indexController = new HealthCheckController();
 
   public initializeRoutes(
@@ -14,7 +14,7 @@ export default class HealthCheckRoute implements Routes {
   ) {
     fastify.route({
       method: 'GET',
-      url: `${this.path}health-check`,
+      url: `${this.path}/health-check`,
       schema: healthCheckSchema,
       handler: HealthCheckController.index
     });
