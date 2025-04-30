@@ -6,7 +6,7 @@ import SummaryRoute from '@/routes/summary.route';
 
 export const initializeRoutes: FastifyPluginCallbackTypebox<
   FastifyPluginOptions
-> = (server, options, done) => {
+> = async (server, options) => {
   const routes = [new HealthCheckRoute(), new SummaryRoute()];
 
   routes.forEach((route: Routes) => {
@@ -16,5 +16,4 @@ export const initializeRoutes: FastifyPluginCallbackTypebox<
       ) as FastifyPluginCallbackTypebox<FastifyPluginOptions>
     );
   });
-  done();
 };
