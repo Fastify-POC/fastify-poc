@@ -1,6 +1,7 @@
 import { FastifyInstance, RouteOptions } from 'fastify';
 import { Routes } from '@/interfaces/routes.interface';
 import AssetsController from '@/controllers/assets.controller';
+import { assetsSchema } from '@/schema/assets.schema';
 
 export default class AssetsRoute implements Routes {
   public path = '/assets';
@@ -14,29 +15,7 @@ export default class AssetsRoute implements Routes {
     fastify.route({
       method: 'GET',
       url: `${this.path}/images`,
-      schema: {
-        querystring: {
-          type: 'object',
-          properties: {
-            filename: { type: 'string' }
-          },
-          required: ['filename']
-        },
-        response: {
-          200: {
-            type: 'object',
-            properties: {
-              hello: { type: 'string' }
-            }
-          },
-          404: {
-            type: 'object',
-            properties: {
-              message: { type: 'string' }
-            }
-          }
-        }
-      },
+      schema: assetsSchema,
       handler: AssetsController.getImageByQuery
     });
     done();
