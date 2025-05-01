@@ -8,8 +8,8 @@
   },
   "scripts": {
     "dev": "nodemon",
-    "start": "npm run build && tsx dist/server.js",
-    "build": "tsc --build",
+    "start": "ts-node -r tsconfig-paths/register dist/server.js",
+    "build": "npm run eslint && tsc --build",
     "eslint": "eslint . --ext .ts",
     "eslint:fix": "eslint . --ext .ts --fix"
   },
@@ -28,6 +28,7 @@
     "fastify": "^5.0.0",
     "fastify-cli": "^7.4.0",
     "fastify-plugin": "^5.0.0",
+    "fastify-tsconfig": "^3.0.0",
     "fluent-json-schema": "^6.0.0",
     "langchain": "^0.3.24"
   },
@@ -38,11 +39,12 @@
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.2.6",
     "nodemon": "^3.1.10",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.5.2"
   }
 }

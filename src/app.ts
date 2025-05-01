@@ -1,5 +1,5 @@
 import fastify, { FastifyError, FastifyInstance } from 'fastify';
-import { SERVER_CONFIG, LOGGING_CONFIG } from '@/config/index';
+import { LOGGING_CONFIG, SERVER_CONFIG } from '@/config/index';
 import fastifyCors from '@fastify/cors';
 import fastifyEnv from '@fastify/env';
 import { envSchema } from '@/schema/env.schema';

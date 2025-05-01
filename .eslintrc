@@ -1,4 +1,7 @@
 {
+  "env": {
+    "node": true
+  },
   "parser": "@typescript-eslint/parser",
   "extends": [
     "eslint:recommended",
@@ -50,17 +53,6 @@
     "curly": ["error", "all"],
     "eol-last": ["error"],
     "keyword-spacing": ["error"],
-    "max-len": [
-      "error",
-      {
-        "code": 120,
-        "tabWidth": 2,
-        "ignoreComments": true,
-        "ignoreStrings": true,
-        "ignoreRegExpLiterals": true,
-        "ignoreUrls": true
-      }
-    ],
     "default-param-last": ["error"],
     "no-else-return": ["error"],
     "no-mixed-spaces-and-tabs": ["error"],
@@ -76,7 +68,9 @@
       {
         "args": "after-used",
         "vars": "all",
-        "ignoreRestSiblings": true
+        "ignoreRestSiblings": true,
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
       }
     ],
     "quotes": [

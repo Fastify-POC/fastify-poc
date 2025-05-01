@@ -1,5 +1,5 @@
 import { FastifyPluginOptions } from 'fastify';
-import { FastifyPluginCallbackTypebox } from '@fastify/type-provider-typebox';
+import { type FastifyPluginCallbackTypebox } from '@fastify/type-provider-typebox';
 import { Routes } from '@/interfaces/routes.interface';
 import HealthCheckRoute from '@/routes/healthCheck.route';
 import SummaryRoute from '@/routes/summary.route';
@@ -7,7 +7,7 @@ import AssetsRoute from '@/routes/assets.route';
 
 export const initializeRoutes: FastifyPluginCallbackTypebox<
   FastifyPluginOptions
-> = async (server, options) => {
+> = async (server) => {
   const routes = [
     new HealthCheckRoute(),
     new SummaryRoute(),
