@@ -19,6 +19,17 @@ export const summarySchema = {
       example: {
         summary: 'This is a summary of the text provided.'
       }
+    },
+    500: {
+      description: 'Error response',
+      type: 'object',
+      properties: {
+        error: { type: 'string' }
+      },
+      required: ['error'],
+      example: {
+        error: 'An error occurred during generation'
+      }
     }
     // add Error response schema
   }

@@ -35,7 +35,8 @@ export default class App {
     this.app.register(fastifyEnv, { dotenv: true, schema: envSchema });
     this.app.register(fastifyCors, {
       origin: SERVER_CONFIG.ORIGIN,
-      credentials: SERVER_CONFIG.CREDENTIALS === 'true'
+      credentials: SERVER_CONFIG.CREDENTIALS === 'true',
+      methods: SERVER_CONFIG.ALLOWED_METHODS
     });
   }
 

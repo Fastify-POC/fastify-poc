@@ -6,7 +6,8 @@ export const SERVER_CONFIG = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '3000', 10),
   API_VERSION: process.env.API_VERSION || 'v1',
-  ORIGIN: process.env.ORIGIN ? process.env.ORIGIN.split(',') : ['*'],
+  ORIGIN: process.env.ORIGIN?.split(',') || ['*'],
+  ALLOWED_METHODS: process.env.ALLOWED_METHODS?.split(',') || [],
   CREDENTIALS: process.env.CREDENTIALS || 'true'
 };
 
@@ -17,5 +18,8 @@ export const LOGGING_CONFIG = {
 
 export const API_KEY_CONFIG = {
   GROQ_API_KEY: process.env.GROQ_API_KEY || '',
-  GROQ_MODEL: process.env.GROQ_MODEL || ''
+  GROQ_MODEL: process.env.GROQ_MODEL || '',
+
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
+  GEMINI_MODEL: process.env.GEMINI_MODEL || ''
 };
