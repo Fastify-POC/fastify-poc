@@ -5,6 +5,7 @@ import { API_KEY_CONFIG, SERVER_CONFIG } from '@/config';
 import { Readable } from 'node:stream';
 import { destroyStream } from '@/utils/stream-util';
 
+const DELAY = 1000;
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 export default class SummaryController {
   public static async summarize(req: FastifyRequest, reply: FastifyReply) {
@@ -53,7 +54,7 @@ export default class SummaryController {
                   firstToken = true;
                 }
 
-                await delay(0);
+                await delay(DELAY);
                 sseStream.push(`data: ${JSON.stringify({ text: token })}\n\n`);
               },
               handleLLMError: (err) => {
