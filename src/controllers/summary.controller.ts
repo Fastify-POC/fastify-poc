@@ -2,10 +2,14 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { API_KEY_CONFIG, SERVER_CONFIG } from '@/config';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
+import { destroyStream } from '@/utils/stream-util';
 
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 export default class SummaryController {
   public static async summarize(req: FastifyRequest, reply: FastifyReply) {
+    console.time('First token received');
+
     try {
       const { text } = req.body as { text: string };
 
@@ -27,29 +31,15 @@ export default class SummaryController {
 
       sseStream.pipe(reply.raw);
 
-      let isPaused = false;
-
-      const tokenQueue: string[] = [];
-
-      const processQueue = () => {
-        while (tokenQueue.length > 0) {
-          const token = tokenQueue.shift()!;
-          const canContinue = sseStream.push(
-            `data: ${JSON.stringify({ text: token })}\n\n`
-          );
-
-          if (!canContinue) {
-            return;
-          }
-        }
-
-        isPaused = false;
-      };
-
-      sseStream.on('drain', () => {
-        processQueue();
+      sseStream.on('end', () => {
+        destroyStream(sseStream);
       });
 
+      sseStream.on('error', () => {
+        destroyStream(sseStream);
+      });
+
+      let firstToken = false;
       const streamComplete = new Promise<void>((resolve) => {
         const llm = new ChatGoogleGenerativeAI({
           apiKey: API_KEY_CONFIG.GEMINI_API_KEY,
@@ -57,27 +47,24 @@ export default class SummaryController {
           streaming: true,
           callbacks: [
             {
-              handleLLMNewToken: (token) => {
-                if (isPaused) {
-                  tokenQueue.push(token);
-                  return;
+              handleLLMNewToken: async (token) => {
+                if (!firstToken) {
+                  console.timeEnd('First token received');
+                  firstToken = true;
                 }
 
-                const canContinue = sseStream.push(
-                  `data: ${JSON.stringify({ text: token })}\n\n`
+                await delay(0);
+                sseStream.push(`data: ${JSON.stringify({ text: token })}\n\n`);
+              },
+              handleLLMError: (err) => {
+                console.error('LLM error:', err);
+                sseStream.push(
+                  `data: ${JSON.stringify({ error: 'Error from model' })}\n\n`
                 );
-
-                if (!canContinue) {
-                  isPaused = true;
-
-                  console.log(
-                    'Backpressure detected, pausing token processing'
-                  );
-                }
+                resolve();
               },
               handleLLMEnd: () => {
-                processQueue();
-
+                sseStream.push(`data: ${JSON.stringify({ done: true })}\n\n`);
                 resolve();
               }
             }
