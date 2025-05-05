@@ -36,6 +36,10 @@ export default class SummaryController {
         destroyStream(sseStream);
       });
 
+      reply.raw.on('close', () => {
+        destroyStream(sseStream);
+      });
+
       sseStream.on('error', () => {
         destroyStream(sseStream);
       });
