@@ -1,8 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { PromptTemplate } from '@langchain/core/prompts';
-import { LLMChain } from 'langchain/chains';
 import { API_KEY_CONFIG, SERVER_CONFIG } from '@/config';
+import { Readable } from 'stream';
 
 export default class SummaryController {
   public static async summarize(req: FastifyRequest, reply: FastifyReply) {
@@ -19,34 +19,94 @@ export default class SummaryController {
         'Access-Control-Max-Age': '86400'
       });
 
-      const llm = new ChatGoogleGenerativeAI({
-        apiKey: API_KEY_CONFIG.GEMINI_API_KEY,
-        model: API_KEY_CONFIG.GEMINI_MODEL,
-        streaming: true,
-        callbacks: [
-          {
-            handleLLMNewToken: async (token) => {
-              reply.raw.write(`data: ${JSON.stringify({ text: token })}\n\n`);
-              reply.raw.flushHeaders();
-            }
-          }
-        ]
+      const sseStream = new Readable({
+        read() {
+          /* no-op */
+        }
       });
 
-      const promptTemplate = ` 
-        Please provide a clear and detailed summary of the following text. Focus on preserving key information and important details, not just shortening the content. Only return the summary and do not include any explanations or additional responses:
-      
-        {text}
-      
-        Summary:
-      `;
+      sseStream.pipe(reply.raw);
 
-      const prompt = PromptTemplate.fromTemplate(promptTemplate);
-      const chain = new LLMChain({ llm, prompt });
+      let isPaused = false;
 
-      await chain.invoke({ text });
+      const tokenQueue: string[] = [];
 
-      reply.raw.end();
+      const processQueue = () => {
+        while (tokenQueue.length > 0) {
+          const token = tokenQueue.shift()!;
+          const canContinue = sseStream.push(
+            `data: ${JSON.stringify({ text: token })}\n\n`
+          );
+
+          if (!canContinue) {
+            return;
+          }
+        }
+
+        isPaused = false;
+      };
+
+      sseStream.on('drain', () => {
+        processQueue();
+      });
+
+      const streamComplete = new Promise<void>((resolve) => {
+        const llm = new ChatGoogleGenerativeAI({
+          apiKey: API_KEY_CONFIG.GEMINI_API_KEY,
+          model: API_KEY_CONFIG.GEMINI_MODEL,
+          streaming: true,
+          callbacks: [
+            {
+              handleLLMNewToken: (token) => {
+                if (isPaused) {
+                  tokenQueue.push(token);
+                  return;
+                }
+
+                const canContinue = sseStream.push(
+                  `data: ${JSON.stringify({ text: token })}\n\n`
+                );
+
+                if (!canContinue) {
+                  isPaused = true;
+
+                  console.log(
+                    'Backpressure detected, pausing token processing'
+                  );
+                }
+              },
+              handleLLMEnd: () => {
+                processQueue();
+
+                resolve();
+              }
+            }
+          ]
+        });
+
+        const promptTemplate = ` 
+          Please provide a clear and detailed summary of the following text. Focus on preserving key information and important details, not just shortening the content. Only return the summary and do not include any explanations or additional responses:
+        
+          {text}
+        
+          Summary:
+        `;
+
+        const prompt = PromptTemplate.fromTemplate(promptTemplate);
+        const chain = prompt.pipe(llm);
+
+        chain.invoke({ text }).catch((error) => {
+          console.error('Error during LLM invocation:', error);
+          sseStream.push(
+            `data: ${JSON.stringify({ error: 'An error occurred during generation' })}\n\n`
+          );
+          resolve();
+        });
+      });
+
+      await streamComplete;
+
+      sseStream.push(null);
     } catch (error) {
       console.error('Error in streaming summary:', error);
 
